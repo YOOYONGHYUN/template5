@@ -1,4 +1,8 @@
 // do something!
+// import { observe } from "./observer";
+import { store } from "./index.js";
+import { observe } from "./observer.js";
+
 function NewsList() {
   let container = document.createElement("div");
   container.classList.add("news-list-container");
@@ -49,40 +53,47 @@ function NewsList() {
     });
   };
 
-  const category = "all";
   let page = 0;
+  let category = "all";
   const pageSize = 5;
+  const apiKey = "3ba9cf6e16b349dd9ba846e5e05e0ac6";
+  let url;
 
-  async function getNews() {
-    const apiKey = "9d11e9e0bf9646678a39ecd9957cbbca";
-    const url = `https://newsapi.org/v2/top-headlines?country=kr&category=${
-      category === "all" ? "" : category
-    }&page=${page}&pageSize=${pageSize}&apiKey=${apiKey}`;
-    try {
-      const response = await axios.get(url);
-      showPost(response.data.articles);
-      scrollObs.appendChild(spin);
-    } catch (error) {
-      console.log(error);
-    }
+  observe(async () => {
+    category = store.state.category;
+    page = 0;
+    reset();
+  });
+
+  function reset() {
+    const $reset = document.querySelector(".news-list");
+    $reset.innerHTML = "";
   }
 
-  // target 선언
-
+  //intersaction 설정
   // option 설정
   const option = {
     root: null, //viewport
     rootMargin: "0px",
-    threshold: 0.8, // 전체(100%)가 viewport에 들어와야 callback함수 실행
+    threshold: 0.8, // 80%가 viewport에 들어와야 callback함수 실행
   };
 
   // callback 함수 정의
   const callback = (entries, observer) => {
-    entries.forEach((entry) => {
+    entries.forEach(async (entry) => {
       if (entry.isIntersecting) {
         page++;
-        //console.log(page);
-        getNews();
+        console.log(page);
+        url = `https://newsapi.org/v2/top-headlines?country=kr&category=${
+          category === "all" ? "" : category
+        }&page=${page}&pageSize=${pageSize}&apiKey=${apiKey}`;
+        try {
+          const response = await axios.get(url);
+          await showPost(response.data.articles);
+          scrollObs.appendChild(spin);
+        } catch (error) {
+          console.log(error);
+        }
       }
     });
   };
@@ -93,4 +104,5 @@ function NewsList() {
   // target 관찰
   observer.observe(scrollObs);
 }
+
 export default NewsList;

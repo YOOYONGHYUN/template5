@@ -1,4 +1,7 @@
 // do something!
+import { observe } from "./observer.js";
+import { store } from "./index.js";
+
 const Nav = () => {
   let ids = [
     "all",
@@ -34,6 +37,7 @@ const Nav = () => {
   nav.appendChild(ul);
 
   let categoryItem = document.querySelectorAll(".category-item");
+  categoryItem[0].classList.add("active");
   for (let i = 0; i < categoryItem.length; i++) {
     categoryItem[i].addEventListener("click", function (e) {
       categoryItem[i].classList.add("active");
@@ -42,6 +46,9 @@ const Nav = () => {
           categoryItem[j].classList.remove("active");
         }
       }
+      const categoryId = e.target.id;
+      store.setState({ category: categoryId });
+      console.log(store.state.category);
     });
   }
 };
